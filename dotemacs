@@ -1,1 +1,93 @@
-/home/eitan/.emacs
+(setq inhibit-startup-message t)
+
+(setq require-final-newline t)
+
+(setq default-frame-alist
+      '((top . 0)
+	(width . 100) (height . 80)
+	(cursor-color . "yellow")
+	(foreground-color . "white")
+	(background-color . "black")
+        (font . "-*-Inconsolata-*-*-*-*-36-*-*-*-*-*-*-*")
+))
+
+(show-paren-mode 1)
+
+(setq show-paren-delay 0)
+
+(setq default-cursor-type '(bar . 2))
+(setq default-cursor-in-non-selected-windows 'hbar)
+(blink-cursor-mode (- (*) (*) (*)))
+
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+(display-time)
+
+(global-set-key (kbd "C-;") 'goto-line)
+(global-set-key (kbd "C-'") 'query-replace)
+(if window-system
+    (tool-bar-mode -1))
+
+(add-to-list 'load-path "~/emacs_elisp")
+(add-to-list 'load-path "~/emacs_elisp/ess-16.04")
+(eval-after-load "sql"
+  '(load-library "sql-indent"))
+
+(setq auto-mode-alist
+      (append
+       '(("\\.\\(p\\(?:k[bg]\\|ls\\)\\|sql\\)\\'" . sql-mode))
+       auto-mode-alist))
+
+(add-to-list 'load-path "~/emacs_elisp/themes")
+
+(require 'color-theme)
+(load-file "~/emacs_elisp/sublime-text-2.el")
+(sublime-text-2)
+
+(setq-default major-mode 'text-mode)
+
+(add-hook 'c-mode-hook (lambda ()
+      (font-lock-add-keywords nil         
+			      '(("[<>:&*=+^%!~,.?;/-]" 0 font-lock-keyword-face)))
+
+))
+(font-lock-add-keywords 'sql-mode
+			'(("[<>:&=+^%!~.?;/-]" . font-lock-keyword-face)))
+(font-lock-add-keywords 'python-mode
+			'(("[<>:&*=+^%!~,.?;/-]" . font-lock-keyword-face)))
+
+(require 'rainbow-delimiters)
+(global-rainbow-delimiters-mode)
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages '(pyvenv)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(rainbow-delimiters-depth-1-face ((t (:foreground "Orange"))))
+ '(rainbow-delimiters-depth-2-face ((t (:foreground "Yellow"))))
+ '(rainbow-delimiters-depth-3-face ((t (:foreground "Cyan"))))
+ '(rainbow-delimiters-depth-4-face ((t (:foreground "Magenta"))))
+ '(rainbow-delimiters-depth-5-face ((t (:foreground "#ccff"))))
+ '(rainbow-delimiters-depth-6-face ((t (:foreground "#00cc00"))))
+ '(rainbow-delimiters-depth-7-face ((t (:foreground "#ff0000")))))
+
+(require 'highlight-symbol)
+(global-set-key (kbd "C-.") 'highlight-symbol-mode)
+(global-set-key (kbd "C-M-.") 'highlight-symbol-at-point)
+
+(setq frame-title-format '((:eval default-directory)))
+
+(require 'package)
+(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
+                         ("melpa" . "https://melpa.org/packages/")))
+(package-initialize)
+
+(require 'pyvenv)
+(pyvenv-activate "/home/eitan/tf")
