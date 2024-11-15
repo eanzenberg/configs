@@ -4,7 +4,7 @@
 
 (setq default-frame-alist
       '((top . 0)
-	(width . 100) (height . 80)
+	(width . 104) (height . 80)
 	(cursor-color . "yellow")
 	(foreground-color . "white")
 	(background-color . "black")
@@ -14,9 +14,9 @@
 (show-paren-mode 1)
 
 (setq show-paren-delay 0)
-
-(setq default-cursor-type '(bar . 2))
-(setq default-cursor-in-non-selected-windows 'hbar)
+(setq-default cursor-type 'bar)
+;(setq default-cursor-type 'bar)
+;(setq default-cursor-in-non-selected-windows 'bar)
 (blink-cursor-mode (- (*) (*) (*)))
 
 (setq make-backup-files nil)
@@ -64,7 +64,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(pyvenv)))
+ '(package-selected-packages '(company-jedi flycheck pyenv-mode company pyvenv)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -81,6 +81,8 @@
 (require 'highlight-symbol)
 (global-set-key (kbd "C-.") 'highlight-symbol-mode)
 (global-set-key (kbd "C-M-.") 'highlight-symbol-at-point)
+(global-set-key (kbd "M-n") 'make-frame-command)
+(global-set-key (kbd "C-M-e") 'eval-buffer)
 
 (setq frame-title-format '((:eval default-directory)))
 
@@ -91,3 +93,51 @@
 
 (require 'pyvenv)
 (pyvenv-activate "/home/eitan/tf")
+
+(setq python-shell-interpreter "/home/eitan/tf/bin/python")
+
+(use-package company
+  :ensure t
+  :config
+  (global-company-mode)
+  (setq company-idle-delay 0.2)  ; Delay to show suggestions
+  (setq company-dabbrev-ignore-case t)
+  (setq company-dabbrev-downcase nil)
+  (setq company-minimum-prefix-length 1))  ; Minimum prefix length for activation
+
+(use-package company-jedi
+  :ensure t
+  :config
+  (defun my/python-mode-setup ()
+    (add-to-list 'company-backends 'company-jedi))
+  (add-hook 'python-mode-hook 'my/python-mode-setup))
+
+(defun my-comint-init ()
+  (define-key comint-mode-map [up] 'comint-previous-input)
+  (define-key comint-mode-map [down] 'comint-next-input)
+  (define-key comint-mode-map (kbd "C-p") 'comint-previous-input)
+  (define-key comint-mode-map (kbd "C-n") 'comint-next-input))
+(add-hook 'comint-mode-hook 'my-comint-init)
+
+(defun my-send-buffer-with-prefix-fn ()
+  (interactive)
+  (unless (get-buffer "*Python*")
+;  (if (not (get-buffer "*Python*")) ; Check if a Python REPL is open
+      (save-selected-window          ; Preserve the current window
+      (run-python)                 ; Start the REPL
+      (let ((repl-window (get-buffer-window "*Python*")))
+        (when repl-window
+          (select-window repl-window)
+          (switch-to-buffer "*Python*")))
+      (split-window-below)         ; Split window and place the REPL below
+      (other-window 1)
+      (switch-to-buffer "*Python*")
+      (sleep-for 0.25)))
+  (let ((current-prefix-arg '(4))) ; Simulate C-u
+    (call-interactively 'python-shell-send-buffer))
+)
+  
+(add-hook 'python-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c C-c") 'my-send-buffer-with-prefix-fn)))
+
