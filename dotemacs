@@ -64,7 +64,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(company-jedi flycheck pyenv-mode company pyvenv)))
+ '(package-selected-packages '(diff-hl company-jedi flycheck pyenv-mode company pyvenv)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -93,8 +93,6 @@
 
 (require 'pyvenv)
 (pyvenv-activate "/home/eitan/tf")
-
-(setq python-shell-interpreter "/home/eitan/tf/bin/python")
 
 (use-package company
   :ensure t
@@ -140,4 +138,23 @@
 (add-hook 'python-mode-hook
           (lambda ()
             (local-set-key (kbd "C-c C-c") 'my-send-buffer-with-prefix-fn)))
+
+(setq python-shell-interpreter "/home/eitan/tf/bin/python"
+      python-shell-interpreter-args "-i" ; Ensure the interpreter starts in interactive mode
+      python-shell-prompt-detect-failure-warning nil)
+
+
+(setq comint-buffer-maximum-size 10000)  ; Adjust the size as needed
+(add-hook 'comint-output-filter-functions 'comint-truncate-buffer)
+
+(global-set-key (kbd "C-x g") 'magit-status)
+
+(add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+(add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
+(add-hook 'text-mode-hook 'turn-on-diff-hl-mode)
+(use-package diff-hl
+  :ensure t
+  :config
+  (global-diff-hl-mode)
+  (add-hook 'dired-mode-hook 'diff-hl-dired-mode))
 
